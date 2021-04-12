@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="graduatoriaDefinitiva" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="254cbfb5-2955-46a4-a2ab-39173c968c12">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Nuovo Data Adapter "/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="gradPubblica" uuid="646c3d19-3c15-49af-a05f-d1b4a4246934">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Nuovo Data Adapter "/>
+		<parameter name="IDSCUOLA" class="java.math.BigDecimal"/>
+		<parameter name="IDTIPOFREQUENZA" class="java.math.BigDecimal"/>
+		<parameter name="IDSTEPGRACON" class="java.math.BigDecimal"/>
+		<queryString language="SQL">
+<![CDATA[
+select distinct
+  g.id_domanda_iscrizione,
+  a.cod_anno_scolastico,
+  os.cod_ordine_scuola,
+  sg.descrizione tipograd,
+  fe.cod_fascia_eta,
+  (
+    select distinct
+      'nati dal ' || to_char(eta.data_da, 'dd/MM/yyyy') || ' al ' || to_char(eta.data_a, 'dd/MM/yyyy')
+    from iscritto_t_eta eta
+      join iscritto_t_anagrafica_gra agr on agr.id_anagrafica_gra = eta.id_anagrafica_gra
+      join iscritto_d_fascia_eta fascia on fascia.id_fascia_eta = eta.id_fascia_eta
+      join iscritto_t_anno_sco anno on anno.id_anno_scolastico = agr.id_anno_scolastico
+      join iscritto_d_ordine_scuola ord on ord.id_ordine_scuola = agr.id_ordine_scuola
+    where 1 = 1
+      and fascia.cod_fascia_eta = fe.cod_fascia_eta
+      and anno.cod_anno_scolastico = a.cod_anno_scolastico
+      and ord.cod_ordine_scuola = (select cod_ordine_scuola from iscritto_d_ordine_scuola where id_ordine_scuola = di.id_ordine_scuola)
+  ) as descrizione,
+  g.ordine_preferenza,
+  tf.cod_tipo_frequenza,
+  tf.descrizione desc_tf,
+  g.ordinamento,
+  di.protocollo,
+  g.punteggio,
+  s.descrizione,
+  s.indirizzo,
+  s.id_circoscrizione,
+  idc1.descrizione,
+   '1) '||ss1.descrizione || ', '|| ss1.indirizzo || ' - ' ||tf1.descrizione || ' - ' || stc1.descrizione ||
+   coalesce(CHR(13)||''||CHR(10) || '2) '||ss2.descrizione || ', '|| ss2.indirizzo|| ' - ' ||tf2.descrizione || ' - ' || stc2.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '3) '||ss3.descrizione || ', '|| ss3.indirizzo || ' - ' ||tf3.descrizione || ' - ' || stc3.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '4) '||ss4.descrizione || ', '|| ss4.indirizzo || ' - ' ||tf4.descrizione || ' - ' || stc4.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '5) '||ss5.descrizione || ', '|| ss5.indirizzo || ' - ' ||tf5.descrizione || ' - ' || stc5.descrizione ,'')
+|| coalesce(CHR(13)||''||CHR(10) || '6) '||ss6.descrizione || ', '|| ss6.indirizzo || ' - ' ||tf6.descrizione || ' - ' || stc6.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '7) '||ss7.descrizione || ', '|| ss7.indirizzo || ' - ' ||tf7.descrizione || ' - ' || stc7.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '8) '||ss8.descrizione || ', '|| ss8.indirizzo || ' - ' ||tf8.descrizione || ' - ' || stc8.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '9) '||ss9.descrizione || ', '|| ss9.indirizzo || ' - ' ||tf9.descrizione || ' - ' || stc9.descrizione,'')
+|| coalesce(CHR(13)||''||CHR(10) || '10) '||ss10.descrizione || ', '|| ss10.indirizzo || ' - ' ||tf10.descrizione || ' - ' || stc10.descrizione,'')||CHR(13)||''||CHR(10) NIDI_SCELTI, fe.id_fascia_eta
+from
+  iscritto_t_scuola s,
+  iscritto_d_fascia_eta fe,
+  iscritto_d_tipo_fre tf,
+  iscritto_d_circoscrizione idc1,
+  iscritto_t_step_gra_con sgc,
+  iscritto_t_domanda_isc di,
+  iscritto_t_anno_sco a,
+  iscritto_d_ordine_scuola os,
+  iscritto_d_stato_gra sg,
+  iscritto_t_graduatoria g
+  left join iscritto_r_scuola_pre sc1 on g.id_domanda_iscrizione= sc1.id_domanda_iscrizione and sc1.posizione=1
+  left join iscritto_r_scuola_pre sc2 on g.id_domanda_iscrizione= sc2.id_domanda_iscrizione and sc2.posizione=2
+  left join iscritto_r_scuola_pre sc3 on g.id_domanda_iscrizione= sc3.id_domanda_iscrizione and sc3.posizione=3
+  left join iscritto_r_scuola_pre sc4 on g.id_domanda_iscrizione= sc4.id_domanda_iscrizione and sc4.posizione=4
+  left join iscritto_r_scuola_pre sc5 on g.id_domanda_iscrizione= sc5.id_domanda_iscrizione and sc5.posizione=5
+  left join iscritto_r_scuola_pre sc6 on g.id_domanda_iscrizione= sc6.id_domanda_iscrizione and sc6.posizione=6
+  left join iscritto_r_scuola_pre sc7 on g.id_domanda_iscrizione= sc7.id_domanda_iscrizione and sc7.posizione=7
+  left join iscritto_r_scuola_pre sc8 on g.id_domanda_iscrizione= sc8.id_domanda_iscrizione and sc8.posizione=8
+  left join iscritto_r_scuola_pre sc9 on g.id_domanda_iscrizione= sc9.id_domanda_iscrizione and sc9.posizione=9
+  left join iscritto_r_scuola_pre sc10 on g.id_domanda_iscrizione= sc10.id_domanda_iscrizione and sc10.posizione=10
+  left join iscritto_d_tipo_fre tf1 on sc1.id_tipo_frequenza=tf1.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf2 on sc2.id_tipo_frequenza=tf2.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf3 on sc3.id_tipo_frequenza=tf3.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf4 on sc4.id_tipo_frequenza=tf4.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf5 on sc5.id_tipo_frequenza=tf5.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf6 on sc6.id_tipo_frequenza=tf6.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf7 on sc7.id_tipo_frequenza=tf7.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf8 on sc8.id_tipo_frequenza=tf8.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf9 on sc9.id_tipo_frequenza=tf9.id_tipo_frequenza
+  left join iscritto_d_tipo_fre tf10 on sc10.id_tipo_frequenza=tf10.id_tipo_frequenza
+  left join iscritto_t_scuola ss1 on sc1.id_scuola=ss1.id_scuola
+  left join iscritto_t_scuola ss2 on sc2.id_scuola=ss2.id_scuola
+  left join iscritto_t_scuola ss3 on sc3.id_scuola=ss3.id_scuola
+  left join iscritto_t_scuola ss4 on sc4.id_scuola=ss4.id_scuola
+  left join iscritto_t_scuola ss5 on sc5.id_scuola=ss5.id_scuola
+  left join iscritto_t_scuola ss6 on sc6.id_scuola=ss6.id_scuola
+  left join iscritto_t_scuola ss7 on sc7.id_scuola=ss7.id_scuola
+  left join iscritto_t_scuola ss8 on sc8.id_scuola=ss8.id_scuola
+  left join iscritto_t_scuola ss9 on sc9.id_scuola=ss9.id_scuola
+  left join iscritto_t_scuola ss10 on sc10.id_scuola=ss10.id_scuola
+  left join iscritto_d_stato_scu stc1 on sc1.id_stato_scu =stc1.id_stato_scu
+  left join iscritto_d_stato_scu stc2 on sc2.id_stato_scu =stc2.id_stato_scu
+  left join iscritto_d_stato_scu stc3 on sc3.id_stato_scu =stc3.id_stato_scu
+  left join iscritto_d_stato_scu stc4 on sc4.id_stato_scu =stc4.id_stato_scu
+  left join iscritto_d_stato_scu stc5 on sc5.id_stato_scu =stc5.id_stato_scu
+  left join iscritto_d_stato_scu stc6 on sc6.id_stato_scu =stc6.id_stato_scu
+  left join iscritto_d_stato_scu stc7 on sc7.id_stato_scu =stc7.id_stato_scu
+  left join iscritto_d_stato_scu stc8 on sc8.id_stato_scu =stc8.id_stato_scu
+  left join iscritto_d_stato_scu stc9 on sc9.id_stato_scu =stc9.id_stato_scu
+  left join iscritto_d_stato_scu stc10 on sc10.id_stato_scu =stc10.id_stato_scu
+-- left join iscritto_d_circoscrizione idc1 on idc1.id_circoscrizione = s.id_circoscrizione
+where
+  g.id_fascia_eta = fe.id_fascia_eta and
+  g.id_tipo_frequenza = tf.id_tipo_frequenza and
+  g.id_scuola=s.id_scuola and
+  s.id_circoscrizione=idc1.id_circoscrizione and
+  g.id_step_gra_con= sgc.id_step_gra_con and
+  g.id_domanda_iscrizione=di.id_domanda_iscrizione and
+  di.id_anno_scolastico=a.id_anno_scolastico and
+  di.id_ordine_scuola=os.id_ordine_scuola and
+  sgc.id_stato_gra=sg.id_stato_gra and
+  g.id_step_gra_con= $P{IDSTEPGRACON} and
+  g.id_scuola = $P{IDSCUOLA} and
+  g.id_tipo_frequenza = $P{IDTIPOFREQUENZA}
+order by
+  fe.id_fascia_eta,
+  ordinamento
+]]>
+		</queryString>
+		<field name="id_domanda_iscrizione" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="id_domanda_iscrizione"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_graduatoria"/>
+		</field>
+		<field name="cod_anno_scolastico" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="cod_anno_scolastico"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_anno_sco"/>
+		</field>
+		<field name="cod_ordine_scuola" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="cod_ordine_scuola"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_ordine_scuola"/>
+		</field>
+		<field name="tipograd" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="tipograd"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_stato_gra"/>
+		</field>
+		<field name="cod_fascia_eta" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="cod_fascia_eta"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_fascia_eta"/>
+		</field>
+		<field name="descrizione" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="descrizione"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_fascia_eta"/>
+		</field>
+		<field name="ordine_preferenza" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="ordine_preferenza"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_graduatoria"/>
+		</field>
+		<field name="cod_tipo_frequenza" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="cod_tipo_frequenza"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_tipo_fre"/>
+		</field>
+		<field name="desc_tf" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="desc_tf"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_tipo_fre"/>
+		</field>
+		<field name="ordinamento" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="ordinamento"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_graduatoria"/>
+		</field>
+		<field name="protocollo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="protocollo"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_domanda_isc"/>
+		</field>
+		<field name="punteggio" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="punteggio"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_graduatoria"/>
+		</field>
+		<field name="COLUMN_13" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="descrizione"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_scuola"/>
+		</field>
+		<field name="indirizzo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="indirizzo"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_scuola"/>
+		</field>
+		<field name="id_circoscrizione" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="id_circoscrizione"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_t_scuola"/>
+		</field>
+		<field name="COLUMN_16" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="descrizione"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_circoscrizione"/>
+		</field>
+		<field name="nidi_scelti" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="nidi_scelti"/>
+		</field>
+		<field name="id_fascia_eta" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="id_fascia_eta"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="iscritto_d_fascia_eta"/>
+		</field>
+		<group name="tipoligiaBAMBINI" isStartNewPage="true">
+			<groupExpression><![CDATA[$F{descrizione}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="IDSCUOLA" class="java.math.BigDecimal"/>
+	<parameter name="IDTIPOFREQUENZA" class="java.math.BigDecimal"/>
+	<parameter name="IDSTEPGRACON" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[select 1 from dual]]>
+	</queryString>
+	<field name="?column?" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="?column?"/>
+	</field>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<componentElement>
+				<reportElement x="-10" y="0" width="820" height="110" uuid="66b73124-c1c4-475c-b0bc-3dcf033b2a31">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="gradPubblica" uuid="017b0100-17a2-412a-985d-e5b6d0276200">
+						<datasetParameter name="IDSCUOLA">
+							<datasetParameterExpression><![CDATA[$P{IDSCUOLA}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="IDSTEPGRACON">
+							<datasetParameterExpression><![CDATA[$P{IDSTEPGRACON}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="IDTIPOFREQUENZA">
+							<datasetParameterExpression><![CDATA[$P{IDTIPOFREQUENZA}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="820" uuid="2bb16c35-dda3-4372-8cd0-281838045d2e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [6]"/>
+						<jr:columnGroup width="820" uuid="b32df748-cf84-4980-9723-ed77e3500e06">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [6]"/>
+							<jr:groupHeader groupName="tipoligiaBAMBINI">
+								<jr:cell style="Table_CH" height="0" rowSpan="1">
+									<property name="com.jaspersoft.studio.unit.height" value="px"/>
+									<textField>
+										<reportElement x="0" y="0" width="810" height="0" uuid="34622742-6b5c-4b8b-962f-d5ad7ef5d644"/>
+										<textFieldExpression><![CDATA[$F{descrizione}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupHeader>
+							<jr:columnGroup width="250" uuid="de773793-0763-4de0-9329-05a8d27c1172">
+								<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [5]"/>
+								<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+									<textField>
+										<reportElement x="0" y="0" width="250" height="30" uuid="eeeccd39-84d6-45b0-bfe4-d860ec614456"/>
+										<textElement verticalAlignment="Middle">
+											<paragraph leftIndent="6"/>
+										</textElement>
+										<textFieldExpression><![CDATA["GRADUATORIA: " + $F{tipograd}]]></textFieldExpression>
+									</textField>
+								</jr:columnHeader>
+								<jr:columnGroup width="250" uuid="f97a3ab3-0479-4faa-a877-d9c6d4d11021">
+									<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [5]"/>
+									<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+										<textField>
+											<reportElement x="0" y="0" width="250" height="30" uuid="c157e2aa-d713-46cd-990e-346c56a232aa"/>
+											<textElement verticalAlignment="Middle">
+												<paragraph leftIndent="6"/>
+											</textElement>
+											<textFieldExpression><![CDATA["NIDO: " + $F{COLUMN_13} + ",  "+ $F{indirizzo}]]></textFieldExpression>
+										</textField>
+									</jr:columnHeader>
+									<jr:columnGroup width="250" uuid="a95da343-2ae0-40d3-ae8a-8576f69ddffe">
+										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [5]"/>
+										<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+											<textField>
+												<reportElement x="0" y="0" width="250" height="30" uuid="a1efc6e2-c102-4b78-af28-a60423b563c1"/>
+												<textElement verticalAlignment="Middle">
+													<paragraph leftIndent="6"/>
+												</textElement>
+												<textFieldExpression><![CDATA["Fascia d'eta': " + $F{descrizione}]]></textFieldExpression>
+											</textField>
+										</jr:columnHeader>
+										<jr:column width="70" uuid="dfb7aec0-e49f-4c02-9793-b38f0bae6a09">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1"/>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1">
+													<property name="com.jaspersoft.studio.unit.height" value="px"/>
+												</jr:cell>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+												<staticText>
+													<reportElement mode="Opaque" x="0" y="0" width="70" height="30" backcolor="#EBEBEB" uuid="3c811898-3733-4bd1-b30f-ee577d21b1b5">
+														<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+													</reportElement>
+													<textElement verticalAlignment="Middle">
+														<font isBold="true"/>
+														<paragraph leftIndent="6"/>
+													</textElement>
+													<text><![CDATA[POSIZIONE]]></text>
+												</staticText>
+											</jr:columnHeader>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1"/>
+											<jr:detailCell style="Table_TD" height="20">
+												<textField isStretchWithOverflow="true">
+													<reportElement x="0" y="0" width="70" height="20" uuid="a65d9255-2dfb-4da2-ae71-2e4db827acd1"/>
+													<textElement textAlignment="Center" verticalAlignment="Middle"/>
+													<textFieldExpression><![CDATA[$V{tipoligiaBAMBINI_COUNT}]]></textFieldExpression>
+												</textField>
+											</jr:detailCell>
+										</jr:column>
+										<jr:column width="0" uuid="eab29c59-565f-4754-a572-47587abf0b0b">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1"/>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1"/>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1"/>
+											<jr:detailCell style="Table_TD" height="20"/>
+										</jr:column>
+										<jr:column width="0" uuid="a7b0df6d-702c-4ac0-864c-71ad9d7f093d">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1"/>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+												<property name="com.jaspersoft.studio.unit.width" value="px"/>
+											</jr:columnHeader>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1"/>
+											<jr:detailCell style="Table_TD" height="20"/>
+										</jr:column>
+										<jr:column width="110" uuid="1c773462-9112-4b89-976d-6f4f2e5e118c">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna4"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1">
+												<property name="com.jaspersoft.studio.unit.height" value="px"/>
+											</jr:tableFooter>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+												<staticText>
+													<reportElement mode="Opaque" x="0" y="0" width="110" height="30" backcolor="#EBEBEB" uuid="7f9bbb46-9d43-4ecf-ad8f-c1117b9816eb"/>
+													<textElement textAlignment="Center" verticalAlignment="Middle">
+														<font isBold="true"/>
+														<paragraph leftIndent="3"/>
+													</textElement>
+													<text><![CDATA[NUMERO DOMANDA]]></text>
+												</staticText>
+											</jr:columnHeader>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1">
+												<property name="com.jaspersoft.studio.unit.height" value="px"/>
+											</jr:columnFooter>
+											<jr:detailCell style="Table_TD" height="20">
+												<textField isStretchWithOverflow="true">
+													<reportElement x="0" y="0" width="110" height="20" uuid="faf9a6e4-bdc1-44b0-b486-fa2bbfdbe576">
+														<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+													</reportElement>
+													<textElement textAlignment="Center" verticalAlignment="Middle">
+														<paragraph leftIndent="3"/>
+													</textElement>
+													<textFieldExpression><![CDATA[$F{protocollo}]]></textFieldExpression>
+												</textField>
+											</jr:detailCell>
+										</jr:column>
+										<jr:column width="70" uuid="c43897b1-f20c-4c7b-a608-07c0341ecbaa">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna5"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1"/>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+												<staticText>
+													<reportElement mode="Opaque" x="0" y="0" width="70" height="30" backcolor="#EBEBEB" uuid="c498c25a-fe37-4ca6-a1c5-3cfec0f2daa1"/>
+													<textElement verticalAlignment="Middle">
+														<font isBold="true"/>
+													</textElement>
+													<text><![CDATA[PUNTEGGIO]]></text>
+												</staticText>
+											</jr:columnHeader>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1"/>
+											<jr:detailCell style="Table_TD" height="20">
+												<property name="com.jaspersoft.studio.unit.height" value="px"/>
+												<textField isStretchWithOverflow="true">
+													<reportElement x="0" y="0" width="70" height="20" uuid="20f4cfd3-ab09-4af4-a9a7-ba03417b7b01">
+														<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+													</reportElement>
+													<textElement textAlignment="Center" verticalAlignment="Middle">
+														<paragraph rightIndent="30"/>
+													</textElement>
+													<textFieldExpression><![CDATA[$F{punteggio}]]></textFieldExpression>
+												</textField>
+											</jr:detailCell>
+										</jr:column>
+									</jr:columnGroup>
+								</jr:columnGroup>
+							</jr:columnGroup>
+							<jr:columnGroup width="570" uuid="ec2db90d-77dd-42a5-b243-d2da2292bab6">
+								<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+								<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+									<textField>
+										<reportElement x="0" y="0" width="570" height="30" uuid="b8581d95-87b2-43bd-bd7a-327e8b5a872b"/>
+										<textElement verticalAlignment="Middle">
+											<paragraph leftIndent="6"/>
+										</textElement>
+										<textFieldExpression><![CDATA["ANNO SCOLASTICO: " + $F{cod_anno_scolastico}]]></textFieldExpression>
+									</textField>
+								</jr:columnHeader>
+								<jr:columnGroup width="570" uuid="51be2635-6c49-4100-a45d-5ba10910a387">
+									<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+									<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+										<textField>
+											<reportElement x="0" y="0" width="570" height="30" uuid="75e4e19b-905a-4ecd-87f1-11953c2d31a1"/>
+											<textElement verticalAlignment="Middle">
+												<paragraph leftIndent="6"/>
+											</textElement>
+											<textFieldExpression><![CDATA["CIRCOSCRIZIONE: " + $F{id_circoscrizione}]]></textFieldExpression>
+										</textField>
+									</jr:columnHeader>
+									<jr:columnGroup width="570" uuid="2509031c-40e8-4f36-9ca6-57f1bba1813d">
+										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+										<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+											<textField>
+												<reportElement x="0" y="0" width="570" height="30" uuid="2963c525-633c-4e18-8a7a-230a772ecb6a"/>
+												<textElement verticalAlignment="Middle">
+													<paragraph leftIndent="6"/>
+												</textElement>
+												<textFieldExpression><![CDATA["TIPO FREQUENZA: " + $F{desc_tf}]]></textFieldExpression>
+											</textField>
+										</jr:columnHeader>
+										<jr:column width="570" uuid="b8f128e8-1efe-45af-902a-0233e714a2dc">
+											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna6"/>
+											<jr:tableFooter style="Table_TH" height="0" rowSpan="1"/>
+											<jr:groupHeader groupName="tipoligiaBAMBINI">
+												<jr:cell style="Table_CH" height="0" rowSpan="1">
+													<property name="com.jaspersoft.studio.unit.height" value="px"/>
+												</jr:cell>
+											</jr:groupHeader>
+											<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+												<staticText>
+													<reportElement mode="Opaque" x="0" y="0" width="570" height="30" backcolor="#EBEBEB" uuid="ff9e366a-f75f-4913-b887-b45294bb0d88"/>
+													<textElement verticalAlignment="Middle">
+														<font isBold="true"/>
+													</textElement>
+													<text><![CDATA[PREFERENZE DI SCUOLA ESPRESSE]]></text>
+												</staticText>
+											</jr:columnHeader>
+											<jr:columnFooter style="Table_CH" height="0" rowSpan="1"/>
+											<jr:detailCell style="Table_TD" height="20">
+												<property name="com.jaspersoft.studio.unit.height" value="px"/>
+												<textField isStretchWithOverflow="true">
+													<reportElement x="0" y="0" width="570" height="20" uuid="2fdba68e-ee5b-4553-b478-5692ec1cd3b5"/>
+													<textElement textAlignment="Justified">
+														<paragraph rightIndent="0"/>
+													</textElement>
+													<textFieldExpression><![CDATA[$F{nidi_scelti}]]></textFieldExpression>
+												</textField>
+											</jr:detailCell>
+										</jr:column>
+									</jr:columnGroup>
+								</jr:columnGroup>
+							</jr:columnGroup>
+						</jr:columnGroup>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement mode="Transparent" x="0" y="16" width="100" height="31" forecolor="#2036FA" uuid="0bd1ac43-bb3b-4494-9084-3ebe5c32c1b3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Transparent" x="100" y="16" width="100" height="31" forecolor="#2036FA" uuid="6b9f2a77-90bd-40f2-9f5f-e2e60d5dfa45"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" di " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="485" y="16" width="155" height="31" forecolor="#2036FA" uuid="bbcbbb91-4007-4828-b8ee-2d1d9b2bf20e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ultimo aggiornamento il]]></text>
+			</staticText>
+			<textField pattern=" d MMMM yyyy HH:mm">
+				<reportElement mode="Transparent" x="640" y="16" width="170" height="31" forecolor="#2036FA" uuid="4486c78d-473b-49cf-8b63-472cd2fb6396"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

@@ -1,0 +1,265 @@
+<project xmlns:ivy="antlib:fr.jayasoft.ivy.ant" name="iscritto" default="default" basedir=".">
+
+	<property name="INSTAL_UNIT" value="iscrittojb" />
+	<property name="dist" value="dist/" />
+
+	<property name="src" value="${basedir}/src" />
+	<property name="build" value="${basedir}/build" />
+	<property name="temp" value="${build}/temp" />
+	<property name="prod-comp" value="iscritto-coto-01/iscrittojb" />
+	<property name="lib" value="${basedir}/lib" />
+	<property name="conf" value="${basedir}/conf" />
+
+	<!-- DEFAULT -->
+	<target name="default" description="Verifica se eseguire il build per un solo environment specificato a linea di commando con -Dtarget=${target} o per tutti gli environment ">
+		<condition property="first-call" value="distribution">
+			<not>
+				<equals arg1="${target}" arg2="$${target}" />
+			</not>
+		</condition>
+		<condition property="first-call" value="all-target">
+			<equals arg1="${target}" arg2="$${target}" />
+		</condition>
+		<echo message="target: ${target}" />
+		<echo message="first-call: ${first-call}" />
+		<antcall target="${first-call}" />
+	</target>
+
+	<!-- ALL TARGET -->
+	<target name="all-target" description="Lancia il build per le varie  distribuzioni in sequenza">
+		<antcall target="distribution">
+			<param name="target" value="dev-coto-01" />
+		</antcall>
+		<antcall target="distribution">
+			<param name="target" value="tst-coto-01" />
+		</antcall>
+		<antcall target="distribution">
+			<param name="target" value="coll-coto-01" />
+		</antcall>
+		<antcall target="distribution">
+			<param name="target" value="prod-coto-01" />
+		</antcall>
+	</target>
+
+	<!-- DISTRIBUTION -->
+	<target name="distribution" depends="init" description="Crea i pacchetti per la distribuzione">
+		<antcall target="package-all">
+			<param name="target" value="${target}" />
+		</antcall>
+	</target>
+
+	<!-- PACKAGE ALL -->
+	<target name="package-all" depends="init" description="Crea tutti gli archivi">
+		<echo message="packaging all for target : ${target}" />
+		<antcall target="package-tar">
+			<param name="target" value="${target}" />
+		</antcall>
+	</target>
+
+	<!-- INIT TARGET -->
+	<target name="init" description="Inizializza lo script Ant">
+		<tstamp />
+		<condition property="target" value="dev-coto-01">
+			<equals arg1="${target}" arg2="$${target}" />
+		</condition>
+		<echo message=" target: ${target}" />
+		<mkdir dir="${build}/classes" />
+		<loadproperties srcFile="buildfiles/${target}.properties" />
+		<loadproperties srcFile="buildfiles/build.properties" />
+		<mkdir dir="${build}/archives" />
+	</target>
+
+	<!-- PACKAGE-TAR -->
+	<target name="package-tar" depends="compile-all, environment-config" description="Packages the ${INSTAL_UNIT}-${versione}.tar file">
+		<mkdir dir="${dist}/${target}" />
+
+		<echo message="Packaging ${INSTAL_UNIT}-${versione}.tar file ..." />
+		<tar destfile="${dist}/${target}/${INSTAL_UNIT}-${versione}.tar" basedir="${temp}/${target}/" />
+	</target>
+
+	<!-- CONFIGURAZIONE -->
+	<target name="environment-config" depends="init" description="parsifica i modelli dei file di configurazione inserendo
+	          al loro interno i dati necessari per ciascun ambiente">
+
+		<mkdir dir="${temp}/${target}/${prod-comp}/lib" />
+		<mkdir dir="${temp}/${target}/${prod-comp}/config" />
+
+		<copy todir="${temp}/${target}/${prod-comp}" file="${build}/archives/invio-notifica.jar" />
+		<copy todir="${temp}/${target}/${prod-comp}" file="${build}/archives/generazione-report.jar" />
+		<copy todir="${temp}/${target}/${prod-comp}" file="${build}/archives/verifica-anagrafica.jar" />
+
+		<copy todir="${temp}/${target}/${prod-comp}/config" file="${conf}/log4j.properties" />
+		<copy todir="${temp}/${target}/${prod-comp}/config">
+			<fileset dir="${conf}">
+				<include name="**/*.jrxml" />
+			</fileset>
+		</copy>
+
+		<copy todir="${temp}/${target}/${prod-comp}/lib">
+			<fileset dir="${lib}">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- COMPILE-ALL -->
+	<target name="compile-all" depends="init,load-dependencies" description="Compila tutti i sorgenti.">
+		<echo message="===> Target: ${target}" />
+
+		<path id="library.ref">
+			<fileset dir="${lib}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+		<pathconvert property="mf.classpath" pathsep=" ">
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<flattenmapper />
+					<!-- add lib/ prefix -->
+					<globmapper from="*" to="./lib/*" />
+				</chainedmapper>
+			</mapper>
+
+			<path>
+				<fileset dir="${lib}">
+					<include name="**/*.jar" />
+				</fileset>
+			</path>
+		</pathconvert>
+
+		<echo message="===> mf.classpath: ${mf.classpath}" />
+
+		<javac target="1.8" source="1.8" srcdir="${src}/java" destdir="${build}/classes" debug="true" debuglevel="vars,lines,source" compiler="modern">
+			<classpath refid="library.ref" />
+		</javac>
+
+		<antcall target="build-config" inheritAll="true" />
+
+		<jar destfile="${build}/archives/invio-notifica.jar" basedir="${build}/classes" duplicate="preserve">
+			<manifest>
+				<!-- this tells which class should run when executing your jar -->
+				<attribute name="Main-class" value="it.csi.iscritto.iscrittojb.business.InvioNotifica" />
+				<attribute name="Class-path" value="./config/ ${mf.classpath}" />
+			</manifest>
+		</jar>
+
+		<jar destfile="${build}/archives/generazione-report.jar" basedir="${build}/classes" duplicate="preserve">
+			<manifest>
+				<!-- this tells which class should run when executing your jar -->
+				<attribute name="Main-class" value="it.csi.iscritto.iscrittojb.business.GenerazioneReport" />
+				<attribute name="Class-path" value="./config/ ${mf.classpath}" />
+			</manifest>
+		</jar>
+
+		<jar destfile="${build}/archives/verifica-anagrafica.jar" basedir="${build}/classes" duplicate="preserve">
+			<manifest>
+				<!-- this tells which class should run when executing your jar -->
+				<attribute name="Main-class" value="it.csi.iscritto.iscrittojb.business.VerificaAnagrafica" />
+				<attribute name="Class-path" value="./config/ ${mf.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="build-config">
+		<mkdir dir="build/temp/conf" />
+		<copy todir="build/temp/conf" overwrite="true" file="${conf}/config.properties" />
+
+		<!-- DB -->
+		<replace file="build/temp/conf/config.properties" token="@stringaConnessioneDatabase@" value="${stringaConnessioneDatabase}" />
+		<replace file="build/temp/conf/config.properties" token="@username@" value="${username}" />
+		<replace file="build/temp/conf/config.properties" token="@password@" value="${password}" />
+
+		<!-- NOTIFICATORE -->
+		<replace file="build/temp/conf/config.properties" token="@notificatore.ws.messagebroker.url@" value="${notificatore.ws.messagebroker.url}" />
+		<replace file="build/temp/conf/config.properties" token="@notificatore.ws.messagebroker.tokenjwt@" value="${notificatore.ws.messagebroker.tokenjwt}" />
+
+		<!-- REPORT -->
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.prov.cod.ordine.scuola@" value="${nid.grad.prov.cod.ordine.scuola}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.prov.cod.stato@" value="${nid.grad.prov.cod.stato}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.prov.nome.report@" value="${nid.grad.prov.nome.report}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.prov.output.dir@" value="${nid.grad.prov.output.dir}" />
+
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.def.cod.ordine.scuola@" value="${nid.grad.def.cod.ordine.scuola}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.def.cod.stato@" value="${nid.grad.def.cod.stato}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.def.nome.report@" value="${nid.grad.def.nome.report}" />
+		<replace file="build/temp/conf/config.properties" token="@nid.grad.def.output.dir@" value="${nid.grad.def.output.dir}" />
+
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.prov.cod.ordine.scuola@" value="${mat.grad.prov.cod.ordine.scuola}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.prov.cod.stato@" value="${mat.grad.prov.cod.stato}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.prov.nome.report@" value="${mat.grad.prov.nome.report}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.prov.output.dir@" value="${mat.grad.prov.output.dir}" />
+
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.def.cod.ordine.scuola@" value="${mat.grad.def.cod.ordine.scuola}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.def.cod.stato@" value="${mat.grad.def.cod.stato}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.def.nome.report@" value="${mat.grad.def.nome.report}" />
+		<replace file="build/temp/conf/config.properties" token="@mat.grad.def.output.dir@" value="${mat.grad.def.output.dir}" />
+
+
+		<!-- VERIFICA ANAGRAFICA -->
+		<replace file="build/temp/conf/config.properties" token="@nao.service.url@" value="${nao.service.url}" />
+		<replace file="build/temp/conf/config.properties" token="@nao.service.user@" value="${nao.service.user}" />
+		<replace file="build/temp/conf/config.properties" token="@nao.service.password@" value="${nao.service.password}" />
+		<replace file="build/temp/conf/config.properties" token="@nao.service.delay@" value="${nao.service.delay}" />
+
+		<copy todir="${build}/classes" overwrite="true" file="build/temp/conf/config.properties" />
+	</target>
+
+
+	<!--  IVY  -->
+	<target name="load-ivy">
+		<condition property="target.ivy.task" value="skip-dependencies">
+			<equals arg1="${target.disable.ivy}" arg2="true" />
+		</condition>
+		<condition property="target.ivy.task" value="load-dependencies">
+			<not>
+				<equals arg1="${target.disable.ivy}" arg2="true" />
+			</not>
+		</condition>
+		<echo message="target.disable.ivy: ${target.disable.ivy}" />
+		<antcall target="${target.ivy.task}" />
+	</target>
+
+	<target name="skip-dependencies">
+		<echo message="skipping ivy dependency resolution..." />
+	</target>
+
+	<target name="resolve-dependencies" description="carica le librerie dal repository remoto">
+		<ivy:configure file="${basedir}/buildfiles/ivyconf.xml" />
+		<ivy:resolve file="${basedir}/buildfiles/ivy.xml" />
+	</target>
+
+	<target name="load-dependencies" depends="resolve-dependencies" description="Risolve le dipendenze esterne.">
+		<ivy:retrieve pattern="${basedir}/lib/[artifact].[type]" />
+	</target>
+
+	<!--  CLEAN  -->
+	<target name="clean-all" description="Rimuove tutte le cartelle temporanee." depends="clean-archives, clean-cache, clean-classes, clean-javadoc, clean-temp" />
+
+	<target name="clean-cache" description="Rimuove la cartella di cache di Ivy e la lib.">
+		<delete dir="${build}/cache" failonerror="no" />
+		<delete dir="${lib}" failonerror="no" />
+	</target>
+
+	<target name="clean-temp" description="Rimuove la cartella dei files temporanei di build.">
+		<delete dir="${temp}" />
+	</target>
+
+	<target name="clean-archives" description="Rimuove la cartella degli archivi (war, ear, ...).">
+		<delete dir="${build}/archives" />
+	</target>
+
+	<target name="clean-dist" description="Rimuove la cartella delle distribuzioni.">
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="clean-classes" description="Rimuove la cartella dei sorgenti compilati.">
+		<delete dir="${build}/classes" />
+	</target>
+
+	<target name="clean-javadoc" description="Rimuove la cartella temporanea dei javadoc.">
+		<delete dir="${build}/javadoc" />
+	</target>
+</project>
+

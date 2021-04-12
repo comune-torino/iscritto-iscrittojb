@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final utlizzo versione della libreria JasperReports6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="csi_istruzione" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3d501ffc-6f48-47a8-8273-8458632476dd">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Sample DB"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="Dataset1" uuid="ffe80529-b759-40e5-a819-1630d5f6aedc">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="csi_istruzione"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="281"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="712"/>
+		<parameter name="IDSCUOLA" class="java.math.BigDecimal"/>
+		<parameter name="IDTIPOFREQUENZA" class="java.math.BigDecimal"/>
+		<parameter name="IDSTEPGRACON" class="java.math.BigDecimal"/>
+		<queryString>
+<![CDATA[
+select distinct
+  a.cod_anno_scolastico,
+  tf.descrizione desc_tempo,
+  sg.descrizione,
+  s.descrizione nome_asilo,
+  s.indirizzo,
+  s.id_circoscrizione,
+  (
+    select distinct
+      'nati dal ' || to_char(eta.data_da, 'dd/MM/yyyy') || ' al ' || to_char(eta.data_a, 'dd/MM/yyyy')
+    from iscritto_t_eta eta
+      join iscritto_t_anagrafica_gra agr on agr.id_anagrafica_gra = eta.id_anagrafica_gra
+      join iscritto_d_fascia_eta fascia on fascia.id_fascia_eta = eta.id_fascia_eta
+      join iscritto_t_anno_sco anno on anno.id_anno_scolastico = agr.id_anno_scolastico
+      join iscritto_d_ordine_scuola ord on ord.id_ordine_scuola = agr.id_ordine_scuola
+    where 1 = 1
+      and fascia.cod_fascia_eta = fe.cod_fascia_eta
+      and anno.cod_anno_scolastico = a.cod_anno_scolastico
+      and ord.cod_ordine_scuola = (select cod_ordine_scuola from iscritto_d_ordine_scuola where id_ordine_scuola = di.id_ordine_scuola)
+  ) as tip_bambini,
+  g.ordinamento,
+  di.protocollo,
+  g.punteggio,
+  fe.id_fascia_eta
+from 
+  iscritto_t_graduatoria g,
+  iscritto_d_stato_scu ss,
+  iscritto_t_scuola s,
+  iscritto_d_fascia_eta fe,
+  iscritto_d_tipo_fre tf,
+  iscritto_t_domanda_isc di,
+  iscritto_t_anno_sco a,
+  iscritto_d_stato_gra sg,
+  iscritto_t_step_gra_con sgc
+where
+  g.id_stato_scu=ss.id_stato_scu and
+  g.id_fascia_eta=fe.id_fascia_eta and
+  g.id_tipo_frequenza=tf.id_tipo_frequenza and
+  g.id_scuola=s.id_scuola and
+  g.id_step_gra_con= sgc.id_step_gra_con and
+  g.id_domanda_iscrizione=di.id_domanda_iscrizione and
+  di.id_anno_scolastico=a.id_anno_scolastico and
+  sgc.id_stato_gra=sg.id_stato_gra and
+  g.id_step_gra_con= $P{IDSTEPGRACON} and
+  g.id_scuola = $P{IDSCUOLA} and
+  g.id_tipo_frequenza = $P{IDTIPOFREQUENZA}
+  order by fe.id_fascia_eta, ordinamento
+]]>
+		</queryString>
+		<field name="cod_anno_scolastico" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="cod_anno_scolastico"/>
+		</field>
+		<field name="desc_tempo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="desc_tempo"/>
+		</field>
+		<field name="descrizione" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="descrizione"/>
+		</field>
+		<field name="nome_asilo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="nome_asilo"/>
+		</field>
+		<field name="indirizzo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="indirizzo"/>
+		</field>
+		<field name="id_circoscrizione" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="id_circoscrizione"/>
+		</field>
+		<field name="tip_bambini" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="tip_bambini"/>
+		</field>
+		<field name="ordinamento" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="ordinamento"/>
+		</field>
+		<field name="protocollo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="protocollo"/>
+		</field>
+		<field name="punteggio" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="punteggio"/>
+		</field>
+		<variable name="posizione" class="java.lang.Integer" resetType="Group" resetGroup="descrizine" incrementType="Report" calculation="Count"/>
+		<group name="descrizine" isStartNewPage="true" keepTogether="true">
+			<groupExpression><![CDATA[$F{tip_bambini}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="IDSCUOLA" class="java.math.BigDecimal"/>
+	<parameter name="IDTIPOFREQUENZA" class="java.math.BigDecimal"/>
+	<parameter name="IDSTEPGRACON" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select 1 from dual]]>
+	</queryString>
+	<detail>
+		<band height="235" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="0" width="805" height="179" uuid="8c2ee1a4-d90a-4c5d-a61a-f7b72338e020">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="ac4ecb0e-91a8-47d3-9f57-1886d587392d">
+						<datasetParameter name="IDSCUOLA">
+							<datasetParameterExpression><![CDATA[$P{IDSCUOLA}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="IDSTEPGRACON">
+							<datasetParameterExpression><![CDATA[$P{IDSTEPGRACON}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="IDTIPOFREQUENZA">
+							<datasetParameterExpression><![CDATA[$P{IDTIPOFREQUENZA}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="320" uuid="efeef81f-1cf4-4348-b64b-6349c9a33912">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [2]"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<textField>
+								<reportElement x="0" y="0" width="320" height="30" uuid="89a7c7f2-896d-455e-8df4-4a4304802c1a">
+									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+								</reportElement>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font size="11" isBold="true"/>
+									<paragraph leftIndent="25"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Graduatoria: "+$F{descrizione}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:columnGroup width="320" uuid="ff043dc3-5eb8-4427-8519-e6e151eaf1ce">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [2]"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="320" height="30" uuid="4e4c19d4-c9e6-4331-b071-4686797b05fa"/>
+									<textElement verticalAlignment="Middle">
+										<font size="11" isBold="true"/>
+										<paragraph leftIndent="25"/>
+									</textElement>
+									<textFieldExpression><![CDATA["Nido: " + $F{nome_asilo} + " - " + $F{indirizzo}]]></textFieldExpression>
+								</textField>
+							</jr:columnHeader>
+							<jr:columnGroup width="320" uuid="77953cd0-1818-48a5-9409-521407aec9f2">
+								<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [2]"/>
+								<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+									<textField>
+										<reportElement x="0" y="0" width="320" height="30" uuid="3b34dd3b-4243-4b23-8634-9e0f0546f13d"/>
+										<textElement verticalAlignment="Middle">
+											<font size="11" isBold="true"/>
+											<paragraph leftIndent="25"/>
+										</textElement>
+										<textFieldExpression><![CDATA["Fascia d'eta': " + $F{tip_bambini}]]></textFieldExpression>
+									</textField>
+								</jr:columnHeader>
+								<jr:column width="90" uuid="dc9f83eb-0d34-4249-8212-b2534e34a04a">
+									<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+									<jr:groupHeader groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1">
+											<textField>
+												<reportElement x="0" y="0" width="90" height="0" uuid="82d88d8d-2e7b-4e45-927c-e33db471367e"/>
+												<textFieldExpression><![CDATA[$F{tip_bambini}]]></textFieldExpression>
+											</textField>
+										</jr:cell>
+									</jr:groupHeader>
+									<jr:groupFooter groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+									</jr:groupFooter>
+									<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="90" height="30" forecolor="#000000" backcolor="#F5F5F5" uuid="d7144b9f-6e69-4031-b8d7-7bc4450f5e5d"/>
+											<textElement textAlignment="Center" verticalAlignment="Middle">
+												<font size="11" isBold="true"/>
+												<paragraph leftIndent="25"/>
+											</textElement>
+											<text><![CDATA[POSIZIONE]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="Table_TD" height="30">
+										<textField>
+											<reportElement x="0" y="0" width="90" height="30" uuid="ab2e7a4c-c46f-4f7a-a9f4-bfca9ea8b4a8"/>
+											<textElement textAlignment="Center" verticalAlignment="Middle">
+												<font size="11" isBold="true"/>
+												<paragraph rightIndent="7"/>
+											</textElement>
+											<textFieldExpression><![CDATA[$V{descrizine_COUNT}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="230" uuid="6e95c52d-69c6-496f-aa06-173f5557b9ab">
+									<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+									<jr:groupHeader groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+									</jr:groupHeader>
+									<jr:groupFooter groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+									</jr:groupFooter>
+									<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="230" height="30" forecolor="#000000" backcolor="#F5F5F5" uuid="ed7d6a06-6800-43c5-8bb8-a5cd037f524c"/>
+											<textElement verticalAlignment="Middle">
+												<font size="11" isBold="true"/>
+												<paragraph leftIndent="15"/>
+											</textElement>
+											<text><![CDATA[NUMERO PROTOCOLLO DOMANDA]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="Table_TD" height="30">
+										<textField>
+											<reportElement x="0" y="0" width="230" height="30" uuid="6068d8e2-0926-461c-a269-06760932a550"/>
+											<textElement verticalAlignment="Middle">
+												<font size="11"/>
+												<paragraph leftIndent="18"/>
+											</textElement>
+											<textFieldExpression><![CDATA[$F{protocollo}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+							</jr:columnGroup>
+						</jr:columnGroup>
+					</jr:columnGroup>
+					<jr:columnGroup width="480" uuid="7906b4a0-9907-40af-a8fd-9a7422c0ee70">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<textField>
+								<reportElement x="0" y="0" width="480" height="30" uuid="eef748a9-9f30-422c-901d-97dfc202dd8f">
+									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+								</reportElement>
+								<textElement verticalAlignment="Middle">
+									<font size="11" isBold="true"/>
+									<paragraph leftIndent="0"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Anno Scolastico: " + $F{cod_anno_scolastico}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:columnGroup width="480" uuid="f879c5e0-9179-4948-bce8-9c0fc60022d7">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="480" height="30" uuid="d9e55912-77b2-4298-bef8-63a7960840e5"/>
+									<textElement verticalAlignment="Middle">
+										<font size="11" isBold="true"/>
+										<paragraph leftIndent="0"/>
+									</textElement>
+									<textFieldExpression><![CDATA["Circoscrizione: " +$F{id_circoscrizione}]]></textFieldExpression>
+								</textField>
+							</jr:columnHeader>
+							<jr:columnGroup width="480" uuid="f2dea6e9-daeb-4302-b842-a15f88b66d6a">
+								<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonne [1]"/>
+								<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+									<textField>
+										<reportElement x="0" y="0" width="480" height="30" uuid="6d4c1140-8b46-42f4-9da2-35c58837c6ac"/>
+										<textElement verticalAlignment="Middle">
+											<font size="11" isBold="true"/>
+											<paragraph leftIndent="0"/>
+										</textElement>
+										<textFieldExpression><![CDATA["Tempo frequenza: " +$F{desc_tempo}]]></textFieldExpression>
+									</textField>
+								</jr:columnHeader>
+								<jr:column width="480" uuid="19b7d06e-f917-48af-8429-638617c15778">
+									<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+									<jr:groupHeader groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+									</jr:groupHeader>
+									<jr:groupFooter groupName="descrizine">
+										<jr:cell style="Table_CH" height="0" rowSpan="1"/>
+									</jr:groupFooter>
+									<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="480" height="30" forecolor="#000000" backcolor="#F5F5F5" uuid="77e16d64-11db-4906-811e-48a354c1d25e"/>
+											<textElement verticalAlignment="Middle">
+												<font size="11" isBold="true"/>
+												<paragraph leftIndent="15"/>
+											</textElement>
+											<text><![CDATA[PUNTEGGIO]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="Table_TD" height="30">
+										<textField>
+											<reportElement x="0" y="0" width="480" height="30" uuid="e4d50e8d-06d6-493f-be84-8304d0b831ca"/>
+											<textElement verticalAlignment="Middle">
+												<font size="11"/>
+												<paragraph leftIndent="18"/>
+											</textElement>
+											<textFieldExpression><![CDATA[$F{punteggio}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+							</jr:columnGroup>
+						</jr:columnGroup>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="40" splitType="Stretch">
+			<textField pattern=" d MMMM yyyy">
+				<reportElement x="680" y="2" width="125" height="31" forecolor="#2036FA" uuid="1694072b-7831-4df8-9120-799b75124822"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="533" y="2" width="147" height="31" forecolor="#2036FA" uuid="03fe6c6a-cff0-4762-b361-060667c64dba"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ultimo aggiornamento il]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="100" y="2" width="100" height="31" forecolor="#2036FA" uuid="b4fb2290-8fab-44df-8eda-3bd335c3d5c3"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" di " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="2" width="100" height="31" forecolor="#2036FA" uuid="9118ff7b-c705-4c6a-849f-c31f98bbd37e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
